@@ -75,27 +75,11 @@ def save_questions_to_vectorDB(questions,subject="interview_questions"):
  
 def extract_text_from_file(uploaded_file):
     try:
-        
-        # file_extension = uploaded_file.name.split('.')[-1].lower()
-        # text = ""
-
-        # if file_extension == "pdf":
+     
             
         pdf = fitz.open(stream=uploaded_file.read(), filetype="pdf")
         for page in pdf:
             text += page.get_text()
-        #     pdf.close() 
-
-        # elif file_extension == "docx":
-        #     doc = Document(uploaded_file)
-        #     for para in doc.paragraphs:
-        #         text += para.text + "\n"
-        # elif file_extension in ["xls", "xlsx"]:
-        #     df = pd.read_excel(uploaded_file)
-        #     text = df.to_string(index=False) 
-
-        # else:
-        #     raise ValueError("Unsupported file type. Please upload a PDF or DOCX file.")
 
         return text
 
@@ -208,7 +192,6 @@ def generate_questions(skill, related_skills,experience_level,num_questions):
     
         question1 = [q.strip() for q in questions if q and q.strip() != ""]
         all_questions = basic_questions + question1
-        # print("fttttttttt",all_questions)
         return all_questions
     except Exception as e:
         logger.exception(f"Error generating questions for skill: {skill}")
@@ -287,6 +270,17 @@ def update_texts_in_vectorDB(subject, old_text, new_text):
     except Exception as e:
         logger.exception("Error updating text in vector DB.")
         return {'success': False, 'error': str(e)}
+def generate_answers(questions):
+
+    prompt = f"genrate a meaning full answer related to given {questions} "
+    response = call_openai_api(prompt,max_tokens,temperature,top_p,frequency_penalty,presence_penalty)
+
+    answer = response.choices[0].message['content'].strip()
+    calculate_token_cost(prompt,answer)
+    
+    logger.info("Question: %s | Generated Answer: %s", questions, answer)
+
+    return answer
 
 
 

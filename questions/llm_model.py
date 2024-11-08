@@ -5,11 +5,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 model=config('model_name')
-max_tokens=config('max_tokens')
-temperature=config('temperature')
-top_p=config("top_p")
-frequency_penalty=config('frequency_penalty')
-presence_penalty=config('presence_penalty')
+
 
 
 def call_openai_api(prompt,max_tokens,temperature,top_p,frequency_penalty,presence_penalty):

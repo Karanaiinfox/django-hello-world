@@ -1,5 +1,3 @@
-
-
 import threading
 import logging
 import boto3
@@ -28,13 +26,13 @@ class AppConfig(AppConfig):
             region_name=config('AWS_REGION', 'us-east-1')
         )
         queue_url = config('AWS_SQS_START_QUEUE_URL')
-        processed_ids = set()  # Set to track processed message IDs
+        processed_ids = set()  
 
         while True:
             try:
                 response = sqs.receive_message(
                     QueueUrl=queue_url,
-                    MaxNumberOfMessages=10,  # Fetch multiple messages if available
+                    MaxNumberOfMessages=10,  
                     WaitTimeSeconds=10
                 )
 
@@ -48,14 +46,15 @@ class AppConfig(AppConfig):
                         try:
                             message_data = json.loads(message_body)
                             schedule_id = message_data.get('id')
-
+                            # schedule_id = message_data.get('interviewSchedule', {}).get('id')
                             # Deduplication check
                             if schedule_id in processed_ids:
                                 logger.info(f"Duplicate message with id {schedule_id} skipped.")
                                 sqs.delete_message(QueueUrl=queue_url, ReceiptHandle=receipt_handle)
                                 continue
                             processed_ids.add(schedule_id)
-                            print("Processing schedule_id:", schedule_id)
+                            logger.info("Processing schedule_id: %s", schedule_id)
+
 
                         except json.JSONDecodeError as e:
                             logger.error(f"Failed to decode message body: {message_body}")

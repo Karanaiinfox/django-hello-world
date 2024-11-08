@@ -144,5 +144,7 @@ python-docx==1.1.2
 openpyxl==3.1.5
 xlrd==2.0.1
 # dj-database-url==pip install dj-database-url
-
-boto3
+pandas 
+tiktoken
+boto3==1.35.48
+PyPDF2

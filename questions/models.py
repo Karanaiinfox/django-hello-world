@@ -106,8 +106,7 @@ class Resume(models.Model):
     created_date = models.DateTimeField(blank=True, null=True)
     last_updated_date = models.DateTimeField(blank=True, null=True)
     updated_by = models.IntegerField(blank=True, null=True)
-    schedule = models.ForeignKey(InterviewSchedule, models.DO_NOTHING, blank=True, null=True)
-
+    
     class Meta:
         managed = False
         db_table = 'resume'
