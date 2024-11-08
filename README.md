@@ -1,106 +1,165 @@
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fexamples%2Ftree%2Fmain%2Fpython%2Fdjango&demo-title=Django%20%2B%20Vercel&demo-description=Use%20Django%204%20on%20Vercel%20with%20Serverless%20Functions%20using%20the%20Python%20Runtime.&demo-url=https%3A%2F%2Fdjango-template.vercel.app%2F&demo-image=https://assets.vercel.com/image/upload/v1669994241/random/django.png)
+# SERVER SIDE
 
-# Django + Vercel
+# Overview:
 
-This example shows how to use Django 4 on Vercel with Serverless Functions using the [Python Runtime](https://vercel.com/docs/concepts/functions/serverless-functions/runtimes/python).
+This project aims to create a chatbot capable of conducting technical interviews. The chatbot will analyze the candidate's resume and the job description to tailor interview questions specific to the job role and the candidate's qualifications.
 
-## Demo
+# Features:
 
-https://django-template.vercel.app/
+1.**Extract Skills**: Analyzes and extracts skills from both the candidate's resume and the job descriptions.
 
-## How it Works
+2.**Generate Technical Interview Questions**: Creates interview questions tailored to matched skills, considering the candidate’s experience level.
 
-Our Django application, `example` is configured as an installed application in `api/settings.py`:
+3.**Resume Summarization**: Provides a concise summary of the candidate's resume, highlighting key points.
 
-```python
-# api/settings.py
-INSTALLED_APPS = [
-    # ...
-    'example',
-]
+4.**Speech-to-Speech Interview**: Conducts the interview via voice using Zoom SDK, simulating a real-life interview experience.
+
+5.**Interview Summary and History**: Summarizes the interview session and saves the history of questions and responses for future reference.
+
+# Installation:
+
+1. Clone the repository:
+
+  ```
+   git clone https://github.com/preetisidana648/djangointerview.git
+
 ```
 
-We allow "\*.vercel.app" subdomains in `ALLOWED_HOSTS`, in addition to 127.0.0.1:
+2. Create and activate a virtual environment:
 
-```python
-# api/settings.py
-ALLOWED_HOSTS = ['127.0.0.1', '.vercel.app']
+ *  Command Prompt (Windows):
+
+```
+    python -m venv env
+   .\env\Scripts\activate
+```
+* Bash (macOS/Linux) or Git Bash (Windows):
+
+```
+   python -m venv env
+   source env/bin/activate
 ```
 
-The `wsgi` module must use a public variable named `app` to expose the WSGI application:
+3. Install the required packages:
+```
+   pip install -r requirements.txt
+```
+4. Run migrations:
+```
+python manage.py makemigrations
+python manage.py migrate
+```
+5. Running the Chatbot:
+```
+  python .\manage.py runserver
+```
+# Configuration:
 
-```python
-# api/wsgi.py
-app = get_wsgi_application()
+
+
+
+# Obtaining API Keys
+
+Before running the project, you need to obtain the following API keys from third-party services:
+
+### OpenAI API Key:
+
+Obtain your OpenAI API key from the OpenAI website.
+
+### Zoom SDK Key and Secret:
+
+Obtain your Zoom SDK key and secret from the Zoom Developer website.
+
+Once you have obtained these API keys, you need to set them as environment variables in your system or in a .env file. Here's how you can do it:
+
+Create a .env file in the root directory of your project.
+
+Add the following lines to the .env file:
+
+```
+PORT=8000
+DEBUG=True
+ZOOM_MEETING_SDK_KEY=" your ZOOM_MEETING_SDK_KEY"
+ZOOM_MEETING_SDK_SECRET="your ZOOM_MEETING_SDK_SECRET"
+OPENAI_API_KEY="your OPENAI_API_KEY"
+```
+Make sure to replace the placeholder values with your actual API keys. These environment variables will be read by the Django application during runtime.
+
+
+
+# ClIENT SIDE
+
+
+## Getting Started
+
+System Requirements:
+
+1. [Node.js 18.17^](https://nodejs.org/en) or later.
+2. [pnpm - package manager](https://pnpm.io/installation#using-npm) (recommended)
+
+
+#### Clone the Client-Side Repository:
+
+```
+git clone https://github.com/nishar1995/interviewchatbotui.git
+cd .\client\
 ```
 
-The corresponding `WSGI_APPLICATION` setting is configured to use the `app` variable from the `api.wsgi` module:
-
-```python
-# api/settings.py
-WSGI_APPLICATION = 'api.wsgi.app'
-```
-
-There is a single view which renders the current time in `example/views.py`:
-
-```python
-# example/views.py
-from datetime import datetime
-
-from django.http import HttpResponse
-
-
-def index(request):
-    now = datetime.now()
-    html = f'''
-    <html>
-        <body>
-            <h1>Hello from Vercel!</h1>
-            <p>The current time is { now }.</p>
-        </body>
-    </html>
-    '''
-    return HttpResponse(html)
-```
-
-This view is exposed a URL through `example/urls.py`:
-
-```python
-# example/urls.py
-from django.urls import path
-
-from example.views import index
-
-
-urlpatterns = [
-    path('', index),
-]
-```
-
-Finally, it's made accessible to the Django server inside `api/urls.py`:
-
-```python
-# api/urls.py
-from django.urls import path, include
-
-urlpatterns = [
-    ...
-    path('', include('example.urls')),
-]
-```
-
-This example uses the Web Server Gateway Interface (WSGI) with Django to enable handling requests on Vercel with Serverless Functions.
-
-## Running Locally
+### Install Dependencies:
 
 ```bash
-python manage.py runserver
+npm i
+# or
+pnpm install
+# or
+yarn install
 ```
 
-Your Django application is now available at `http://localhost:8000`.
+Create a .env.local file in the client directory of your project.
 
-## One-Click Deploy
 
-Deploy the example using [Vercel](https://vercel.com?utm_source=github&utm_medium=readme&utm_campaign=vercel-examples):
+```
+NEXT_PUBLIC_GOOGLE_MAP_API_KEY=" "
+NEXTAUTH_SECRET=" "
+NEXTAUTH_URL="http://localhost:3000/"
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+BASE_URL='http://localhost:3000/
+```
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fexamples%2Ftree%2Fmain%2Fpython%2Fdjango&demo-title=Django%20%2B%20Vercel&demo-description=Use%20Django%204%20on%20Vercel%20with%20Serverless%20Functions%20using%20the%20Python%20Runtime.&demo-url=https%3A%2F%2Fdjango-template.vercel.app%2F&demo-image=https://assets.vercel.com/image/upload/v1669994241/random/django.png)
+
+Now, run the development server
+```bash
+npm run dev
+# or
+pnpm dev
+# or
+yarn dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+# Usage
+
+Upon running the project, the chatbot will be accessible via the provided URL.
+
+# Users
+
+ADMIN
+   USERNAME :  nisha@321
+   PASSWORD :  Qwe@123
+HR MANAGER
+ 	USERNAME :  preeti@321
+   PASSWORD :  Qwe@123
+HR
+   USERNAME :  rushali@321
+   PASSWORD :  Qwe@123
+CANDIDATE
+ 	USERNAME :  vand@321, khus@321
+   PASSWORD :  Qwe@123
+Acharya   
+   USERNAME:   acharaya@123
+   PASSWORD:   Qwe@123
+
+
+docker build --tag intbot:latest .
