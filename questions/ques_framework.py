@@ -5,7 +5,7 @@ from fuzzywuzzy import process
 import re
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from langchain_community.vectorstores import Chroma
-from langchain_community.embeddings import HuggingFaceEmbeddings
+# from langchain_community.embeddings import HuggingFaceEmbeddings
 from decouple import config
 import logging
 from docx import Document
@@ -33,34 +33,34 @@ if not os.path.exists(summary_dir):
 if not os.path.exists(resume_dir):
         os.makedirs(resume_dir)
  
-embeddings = HuggingFaceEmbeddings(model_name=emb_model)
+# embeddings = HuggingFaceEmbeddings(model_name=emb_model)
  
 persist_directory =  'chroma_db_files/'
 
 
 
 
-def excel_to_vectorDB(subject,questions):
-    try:
-        db = Chroma.from_texts(collection_name=f"{subject}",
-                                texts=questions,
-                                embedding=embeddings,
-                                persist_directory=persist_directory)
+# def excel_to_vectorDB(subject,questions):
+#     try:
+#         db = Chroma.from_texts(collection_name=f"{subject}",
+#                                 texts=questions,
+#                                 embedding=embeddings,
+#                                 persist_directory=persist_directory)
     
-        return db
-    except Exception as e:
-            logger.exception("Error creating vector DB.")
-            return None
+#         return db
+#     except Exception as e:
+#             logger.exception("Error creating vector DB.")
+#             return None
  
  
-def connect_to_vectorDB(subject):
-    try:
-        vector_db = Chroma(collection_name=f"{subject}", persist_directory=persist_directory, embedding_function=embeddings)
-        logger.info(f"Connected to vector DB for subject: {subject}")
-        return vector_db
-    except Exception as e:
-        logger.exception("Error connecting to vector DB.")
-        return None
+# def connect_to_vectorDB(subject):
+#     try:
+#         vector_db = Chroma(collection_name=f"{subject}", persist_directory=persist_directory, embedding_function=embeddings)
+#         logger.info(f"Connected to vector DB for subject: {subject}")
+#         return vector_db
+#     except Exception as e:
+#         logger.exception("Error connecting to vector DB.")
+#         return None
 
  
 def save_questions_to_vectorDB(questions,subject="interview_questions"):

@@ -83,7 +83,7 @@ class QuestionsView(APIView):
         try:
             logger.info("Generating questions.")
             # Fetch necessary objects
-            vector_db = connect_to_vectorDB("interview_questions")
+            vector_db = None #connect_to_vectorDB("interview_questions")
             schedule = get_object_or_404(InterviewSchedule, pk=schedule_id)
             candidate = schedule.candidate
             job = schedule.job
