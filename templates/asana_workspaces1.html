@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Query and Workspace Details</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f8ff;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+        }
+        h1 {
+            font-size: 2.5rem;
+            color: #007bff;
+            margin-top: 30px;
+            text-shadow: 1px 1px 2px #ccc;
+        }
+        #workspace-container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 1000px;
+            margin: 20px 0;
+        }
+        .workspace-item {
+            border-bottom: 1px solid #e6e6e6;
+            padding: 15px 0;
+        }
+        .workspace-item:last-child {
+            border-bottom: none;
+        }
+        .project-button, .sync-button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        .sync-button {
+            background-color: #28a745;
+        }
+        .sync-button:hover {
+            background-color: #218838;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h1>Query Database and View Workspace Details</h1>
+
+    <div id="workspace-container">
+        <!-- Workspace data will be loaded here -->
+    </div>
+    
+    <script>
+        window.onload = function() {
+            fetch('/get_workspace')
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('workspace-container');
+                    container.innerHTML = '';
+
+                    if (Array.isArray(data) && data.length > 0) {
+                        data.forEach((workspace, index) => {
+                            const workspaceItem = document.createElement('div');
+                            workspaceItem.classList.add('workspace-item');
+                            workspaceItem.innerHTML = `
+                                <strong>Workspace ID:</strong> ${workspace.gid || 'N/A'}<br>
+                                <strong>Workspace Name:</strong> ${workspace.name || 'N/A'}<br>
+                                <strong>Is Organization:</strong> ${workspace.is_organization ? 'Yes' : 'No'}<br>
+                                <strong>Email Domains:</strong> ${
+                                    workspace.email_domains && workspace.email_domains.length > 0 
+                                    ? workspace.email_domains.join(', ') 
+                                    : 'None'
+                                }<br>
+                                <button class="project-button" onclick="fetchProjects('${workspace.gid}', ${index})">View Projects</button>
+                                <div class="project-container" id="project-container-${index}"></div>
+                            `;
+                            container.appendChild(workspaceItem);
+                        });
+                    } else {
+                        container.innerHTML = '<p>No workspace data available.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching workspace data:', error);
+                    document.getElementById('workspace-container').innerHTML = '<p>Error loading workspace data.</p>';
+                });
+        }
+
+        function fetchProjects(workspaceGid, index) {
+            const container = document.getElementById(`project-container-${index}`);
+            container.innerHTML = '<div class="loader"></div>';
+
+            fetch(`/get_projects?workspace_gid=${workspaceGid}`)
+                .then(response => response.json())
+                .then(projects => {
+                    container.innerHTML = '';
+
+                    if (Array.isArray(projects) && projects.length > 0) {
+                        projects.forEach((project, projIndex) => {
+                            const projectItem = document.createElement('div');
+                            projectItem.classList.add('project-item');
+                            projectItem.innerHTML = `
+                                <strong>Project Name:</strong> ${project.name || 'N/A'}<br>
+                                <strong>Project ID:</strong> ${project.gid || 'N/A'}<br>
+                                <button class="project-button" onclick="fetchSections('${project.gid}', ${projIndex})">View Sections</button>
+                                <div class="section-container" id="section-container-${projIndex}"></div>
+                            `;
+                            container.appendChild(projectItem);
+                        });
+                    } else {
+                        container.innerHTML = '<p>No projects found for this workspace.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching projects:', error);
+                    container.innerHTML = '<p>Error loading project data.</p>';
+                });
+        }
+
+        function fetchSections(projectGid, projIndex) {
+            const container = document.getElementById(`section-container-${projIndex}`);
+            container.innerHTML = '<div class="loader"></div>';
+
+            fetch(`/get_sections?project_gid=${projectGid}`)
+                .then(response => response.json())
+                .then(sections => {
+                    container.innerHTML = '';
+
+                    if (Array.isArray(sections) && sections.length > 0) {
+                        sections.forEach(section => {
+                            const sectionItem = document.createElement('div');
+                            sectionItem.classList.add('section-item');
+                            sectionItem.innerHTML = `
+                                <strong>Section Name:</strong> ${section.name || 'N/A'}<br>
+                                <strong>Section ID:</strong> ${section.gid || 'N/A'}<br>
+                                <button class="sync-button" onclick="syncTask('${section.gid}', '${section.name || 'Unnamed Section'}')">Sync Section</button>
+                            `;
+                            container.appendChild(sectionItem);
+                        });
+                    } else {
+                        container.innerHTML = '<p>No sections found for this project.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching sections:', error);
+                    container.innerHTML = '<p>Error loading section data.</p>';
+                });
+        }
+
+        function syncTask(sectionId, sectionName) {
+        fetch(`/asanasync?section_id=${sectionId}&section_name=${encodeURIComponent(sectionName)}`)
+            .then(response => response.json())
+            .then(data => {
+                alert(`Section "${sectionName}" with ID ${sectionId} synchronized successfully.`);
+            })
+            .catch(error => {
+                console.error('Error syncing section:', error);
+                alert('Error syncing section.');
+            });
+    }
+</script>
+</body>
+</html>

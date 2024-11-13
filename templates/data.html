@@ -1,0 +1,267 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+</head>
+
+<body>
+    {{ result | tojson }}
+    {{html_code|safe}}
+    <div id="chart-container">
+        <h2>Deal Analysis</h2>
+        <canvas id="dealsChart"></canvas>
+    
+        <h2>Contact Analysis</h2>
+        <canvas id="contactsChart"></canvas>
+    </div>
+    
+    <script>
+        // Example of how to prepare the data for charting
+        const data = {{ result | tojson }};
+        console.log(data2)
+        const labels2= data.deals.map(deal => deal.deal_name)
+        const data2: data.deals.map(deal => deal.amount)
+        console.log(labels2)
+        console.log(data2)
+        // Initialize Deals Chart
+        const dealsCtx = document.getElementById('dealsChart').getContext('2d');
+        const dealsChart = new Chart(dealsCtx, {
+            type: 'bar',
+            data: {
+                labels: data.deals.map(deal => deal.deal_name),
+                datasets: [{
+                    label: 'Deal Amount',
+                    data: data.deals.map(deal => deal.amount),
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    
+        // Initialize Contacts Chart
+        const contactsCtx = document.getElementById('contactsChart').getContext('2d');
+        const contactsChart = new Chart(contactsCtx, {
+            type: 'pie',
+            data: {
+                labels: data.contacts.map(contact => contact.firstname + ' ' + contact.lastname),
+                datasets: [{
+                    label: 'Total Contacts',
+                    data: data.contacts.map(contact => 1), // 1 for each contact
+                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    borderWidth: 1
+                }]
+            }
+        });
+    </script>
+</body>
+
+</html> -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        #chart-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        canvas {
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="chart-container">
+        <div>
+            <h2>Deal Analysis</h2>
+            <canvas id="dealsChart"></canvas>
+        </div>
+
+        <div>
+            <h2>Contact Analysis</h2>
+            <canvas id="contactsChart"></canvas>
+        </div>
+    </div>
+
+    <div>
+        <h2>Deals Table</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Deal Name</th>
+                    <th>Amount</th>
+                    <th>Stage</th>
+                    <th>Close Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for deal in deals_data %}
+                <tr>
+                    <td>{{ deal.deal_name }}</td>
+                    <td>{{ deal.amount }}</td>
+                    <td>{{ deal.stage }}</td>
+                    <td>{{ deal.close_date }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div>
+        <h2>Contacts Table</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for contact in contacts_data %}
+                <tr>
+                    <td>{{ contact.firstname }}</td>
+                    <td>{{ contact.lastname }}</td>
+                    <td>{{ contact.email }}</td>
+                    <td>{{ contact.phone }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const data = {{ result | tojson }};
+        
+        // Initialize Deals Chart
+        const dealsCtx = document.getElementById('dealsChart').getContext('2d');
+        const dealsChart = new Chart(dealsCtx, {
+            type: 'bar',
+            data: {
+                labels: data.deals.map(deal => deal.deal_name),
+                datasets: [{
+                    label: 'Deal Amount',
+                    data: data.deals.map(deal => deal.amount),
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Amount'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Deals'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Initialize Contacts Chart
+        const contactsCtx = document.getElementById('contactsChart').getContext('2d');
+        const contactsChart = new Chart(contactsCtx, {
+            type: 'pie',
+            data: {
+                labels: data.contacts.map(contact => contact.firstname + ' ' + contact.lastname),
+                datasets: [{
+                    label: 'Total Contacts',
+                    data: data.contacts.map(contact => 1),
+                    backgroundColor: [
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)',
+                        'rgba(255, 205, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(54, 162, 235, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(255, 205, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(54, 162, 235, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

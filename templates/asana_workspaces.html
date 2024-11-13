@@ -1,0 +1,329 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="../../static/style.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+        integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>Query and Workspace Details</title>
+    <style>
+        /* General Styles */
+        body {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- --------UPDATE DESIGN------------ -->
+
+    <!-- NAVBAR -->
+
+    <nav class="navbar bg-body-tertiary header-main">
+        <div class="container-fluid nav-main">
+            <img src="../../static/images/AiInfox logo.svg" alt="Company Logo">
+        </div>
+    </nav>
+
+    <!-- NAVBAR END -->
+
+    <div class="container-fluid back-image">
+        <div class="col-lg-12 d-flex justify-content-center text-center">
+            <h1> Optimizing Queries for Workspace Data</h1>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="selected-div d-flex">
+            <div class="tabs">
+                <div class="tab-buttons">
+                    <button class="tab-btn" onclick="openTab('manual', this)">Manual</button>
+                    <button class="tab-btn" onclick="openTab('ai', this)">AI</button>
+                </div>
+
+                <div class="tab-content">
+                    <div id="manual" class="tab-panel">
+                        <div class="manual-set d-flex justify-content-center">
+                            <div id="workspace-container">
+                                <!-- Workspace data will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="ai" class="tab-panel">
+
+                        <div class="chat-main-box d-flex justify-content-center">
+                            <div class="search-container">
+                                <h2>Feel Free To Chat</h2>
+                                <div class="chat-box" id="chatBox"></div>
+                                <div class="search-box">
+                                    <input type="text" id="chatInput" class="search-input" placeholder="Ask anything..."
+                                        spellcheck="true" />
+                                    <button class="send-button" onclick="sendMessage()">
+                                        <i class="fa-regular fa-paper-plane"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <section class="cta-footer">
+        <p>&copy; 2024 AiInfox. Connecting your business, empowering your growth. All rights reserved.</p>
+      </section>
+    
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+    <!-- FIXED HEADER SCRIPT -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            window.addEventListener("scroll", function () {
+                const navbar = document.querySelector(".header-main");
+
+                if (window.scrollY > 100) {
+                    navbar.classList.add("fixed");
+                } else {
+                    navbar.classList.remove("fixed");
+                }
+            });
+        });
+    </script>
+    <!-- FIXED HEADER SCRIPT END -->
+
+
+    <!-- TAB SCRIPT -->
+    <script>
+        function openTab(tabName, btn) {
+
+            const panels = document.querySelectorAll('.tab-panel');
+            panels.forEach(panel => {
+                panel.style.display = 'none';
+            });
+
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(button => {
+                button.classList.remove('active');
+            });
+
+            const selectedPanel = document.getElementById(tabName);
+            if (selectedPanel) {
+                selectedPanel.style.display = 'block';
+            }
+
+            btn.classList.add('active');
+        }
+
+    </script>
+    <!-- TAB SCRIPT END -->
+
+
+
+
+    <!-- Chabot2 -->
+    <script>
+        function handleKeyDown(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        }
+
+        function sendMessage() {
+            const chatInput = document.getElementById("chatInput");
+            const chatBox = document.getElementById("chatBox");
+            const userMessage = chatInput.value.trim();
+
+            if (userMessage === "") return;
+
+            // Display user message
+            const userMessageElem = document.createElement("div");
+            userMessageElem.classList.add("message", "user-message");
+
+            // Create user message text in <p> tag
+            const userMessageText = document.createElement("p");
+            userMessageText.textContent = userMessage;
+
+            userMessageElem.appendChild(userMessageText);
+            chatBox.appendChild(userMessageElem);
+
+            // Clear input field
+            chatInput.value = "";
+
+            // Simulate bot response
+            const botMessageElem = document.createElement("div");
+            botMessageElem.classList.add("message", "bot-message");
+
+            // Create bot message text in <p> tag
+            const botMessageText = document.createElement("p");
+            botMessageText.textContent = "Thinking...";
+
+            botMessageElem.appendChild(botMessageText);
+            chatBox.appendChild(botMessageElem);
+
+            // Simulate an API call delay
+            setTimeout(() => {
+                botMessageText.textContent = "Hello! How can I assist you today?";
+            }, 1000);
+        }
+    </script>
+
+
+    <!-- MAIN CONTENT SCRIPT -->
+
+    <script>
+        let currentlyOpenProjectContainer = null;
+
+        window.onload = function () {
+            fetch('../../asana/get_workspace/')
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('workspace-container');
+                    container.innerHTML = '';
+
+                    if (Array.isArray(data) && data.length > 0) {
+                        data.forEach((workspace, index) => {
+                            const workspaceItem = document.createElement('div');
+                            workspaceItem.classList.add('workspace-item');
+                            workspaceItem.innerHTML = `
+                                <div>
+                                    <p><strong>Workspace ID:</strong> ${workspace.gid || 'N/A'}</p>
+                                    <p><strong>Name:</strong> ${workspace.name || 'N/A'}</p>
+                                    <p><strong>Is Organization:</strong> ${workspace.is_organization ? 'Yes' : 'No'}</p>
+                                    <p><strong>Email Domains:</strong> ${workspace.email_domains && workspace.email_domains.length > 0
+                                    ? workspace.email_domains.join(', ')
+                                    : 'None'}</p>
+                                    <button class="toggle-project-button project-button" onclick="toggleProjects('${workspace.gid}', ${index})" id="toggle-button-${index}">View Projects</button>
+                                </div>
+                                <div class="project-container" id="project-container-${index}" style="display: none;"></div>
+                            `;
+                            container.appendChild(workspaceItem);
+                        });
+                    } else {
+                        container.innerHTML = '<p>No workspace data available.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching workspace data:', error);
+                    document.getElementById('workspace-container').innerHTML = '<p>Error loading workspace data.</p>';
+                });
+        }
+
+        function toggleProjects(workspaceGid, index) {
+            const projectContainer = document.getElementById(`project-container-${index}`);
+            const toggleButton = document.getElementById(`toggle-button-${index}`);
+
+            if (projectContainer.style.display === 'none') {
+                // Close previously open workspace
+                if (currentlyOpenProjectContainer && currentlyOpenProjectContainer !== projectContainer) {
+                    currentlyOpenProjectContainer.style.display = 'none';
+                    currentlyOpenProjectContainer.previousElementSibling.querySelector('.toggle-project-button').textContent = 'View Projects';
+                }
+
+                // Show current workspace projects
+                projectContainer.style.display = 'block';
+                toggleButton.textContent = 'Close Projects';
+                currentlyOpenProjectContainer = projectContainer;
+
+                // Fetch projects if not already loaded
+                if (projectContainer.innerHTML === '') {
+                    fetchProjects(workspaceGid, index);
+                }
+            } else {
+                // Hide current workspace projects
+                projectContainer.style.display = 'none';
+                toggleButton.textContent = 'View Projects';
+                currentlyOpenProjectContainer = null;
+            }
+        }
+
+        function fetchProjects(workspaceGid, index) {
+            const container = document.getElementById(`project-container-${index}`);
+            container.innerHTML = '<div class="loader"></div>';
+
+            fetch(`../../asana/get_projects?workspace_gid=${workspaceGid}`)
+                .then(response => response.json())
+                .then(projects => {
+                    container.innerHTML = '';
+
+                    if (Array.isArray(projects) && projects.length > 0) {
+                        projects.forEach((project, projIndex) => {
+                            const projectItem = document.createElement('div');
+                            projectItem.classList.add('project-item');
+                            projectItem.innerHTML = `
+                                <p><strong>Project Name:</strong> ${project.name || 'N/A'}</p>
+                                <p><strong>Project ID:</strong> ${project.gid || 'N/A'}</p>
+                                <button class="project-button previous-button-class" onclick="fetchSections('${project.gid}', ${projIndex})">View Sections</button>
+                                <div class="section-container" id="section-container-${projIndex}"></div>
+                            `;
+                            container.appendChild(projectItem);
+                        });
+                    } else {
+                        container.innerHTML = '<p>No projects found for this workspace.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching projects:', error);
+                    container.innerHTML = '<p>Error loading project data.</p>';
+                });
+        }
+
+        function fetchSections(projectGid, projIndex) {
+            const container = document.getElementById(`section-container-${projIndex}`);
+            container.innerHTML = '<div class="loader"></div>';
+            
+            fetch(`../../asana/get_sections?project_gid=${projectGid}`)
+                .then(response => response.json())
+                .then(sections => {
+                    container.innerHTML = '';
+
+                    if (Array.isArray(sections) && sections.length > 0) {
+                        sections.forEach(section => {
+                            const sectionItem = document.createElement('div');
+                            sectionItem.classList.add('section-item');
+                            sectionItem.innerHTML = `
+                                <p><strong>Section Name:</strong> ${section.name || 'N/A'}</p>
+                                <p><strong>Section ID:</strong> ${section.gid || 'N/A'}</p>
+                                <button class="sync-button previous-button-class" onclick="syncTask('${section.gid}', '${section.name || 'Unnamed Section'}')">Sync Section</button>
+                            `;
+                            container.appendChild(sectionItem);
+                        });
+                    } else {
+                        container.innerHTML = '<p>No sections found for this project.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching sections:', error);
+                    container.innerHTML = '<p>Error loading section data.</p>';
+                });
+        }
+
+        function syncTask(sectionId, sectionName) {
+            fetch(`../../asana/asanasync?section_id=${sectionId}&section_name=${encodeURIComponent(sectionName)}`)
+                .then(response => response.json())
+                .then(data => {
+                    alert(`Section "${sectionName}" with ID ${sectionId} synchronized successfully.`);
+                })
+                .catch(error => {
+                    console.error('Error syncing section:', error);
+                    alert('Error syncing section.');
+                });
+        }
+    </script>
+
+
+</body>
+
+</html>

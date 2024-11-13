@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI & Innovation Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #ff6e7f, #bfe9ff);
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        h1 {
+            margin-top: 50px;
+            font-size: 3em;
+        }
+
+        nav {
+            margin: 20px 0;
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        nav a {
+            color: white;
+            margin: 0 15px;
+            text-decoration: none;
+            font-size: 1.2em;
+        }
+
+        .tab-content {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+        }
+
+        #features {
+            display: none;
+        }
+
+        .button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        input {
+            margin: 5px 0;
+            padding: 10px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        footer {
+            margin-top: 50px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Where AI & Innovation Collide</h1>
+
+    <nav>
+        <a href="#" onclick="showTab('home')">Home</a>
+        <a href="#" onclick="showTab('features')">Features</a>
+        <a href="#">Services</a>
+        <a href="#">Contact</a>
+    </nav>
+    
+    <!-- Home Tab -->
+    <div id="home" class="tab-content">
+        
+        <img src="../static/back.png" alt="AI Illustration" width="600">
+        <p>Welcome to the future where Artificial Intelligence blends seamlessly with cutting-edge innovation.</p>
+        <div>
+            <div id="charts-container">
+                <h2>Deals Overview</h2>
+                <canvas id="dealsChart"></canvas>
+                <h2>Contacts Overview</h2>
+                <canvas id="contactsChart"></canvas>
+                <script>
+                    const dealsData = {{ deals | tojson }};
+                    const contactsData = {{ contacts | tojson }};
+            
+                    // Deal Chart Configuration
+                    var ctxDeals = document.getElementById('dealsChart').getContext('2d');
+                    var dealsChart = new Chart(ctxDeals, {
+                        type: 'bar',
+                        data: {
+                            labels: dealsData.map(deal => deal.deal_name),
+                            datasets: [{
+                                label: 'Deal Amounts',
+                                data: dealsData.map(deal => deal.amount),
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+            
+                    // Contacts Chart Configuration
+                    var ctxContacts = document.getElementById('contactsChart').getContext('2d');
+                    var contactsChart = new Chart(ctxContacts, {
+                        type: 'pie',
+                        data: {
+                            labels: contactsData.map(contact => contact.firstname + ' ' + contact.lastname),
+                            datasets: [{
+                                label: 'Contacts',
+                                data: contactsData.map(contact => 1), // each contact represented as 1
+                                backgroundColor: contactsData.map(() => 'rgba(' + Math.floor(Math.random() * 256) + ',' + Math.floor(Math.random() * 256) + ',' + Math.floor(Math.random() * 256) + ',0.5)')
+                            }]
+                        }
+                    });
+                </script>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Tab (Contact Form) -->
+    <div id="features" class="tab-content">
+        <h2>Create a New Contact</h2>
+        <form action="/create_contact" method="POST">
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="text" name="firstname" placeholder="First Name" required>
+            <input type="text" name="lastname" placeholder="Last Name" required>
+            <input type="text" name="phone" placeholder="Phone">
+            <button type="submit" class="button">Add Contact</button>
+
+
+        </form>
+    </div>
+
+    
+    
+   
+    <footer>
+        <p>&copy; 2024 AI Innovations. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function showTab(tabName) {
+            var tabs = document.getElementsByClassName('tab-content');
+            for (var i = 0; i < tabs.length; i++) {
+                tabs[i].style.display = 'none';
+            }
+            document.getElementById(tabName).style.display = 'block';
+        }
+
+        // Display the home tab by default
+        document.getElementById('home').style.display = 'block';
+    </script>
+</body>
+
+</html>

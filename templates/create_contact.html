@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Contact</title>
+</head>
+<body>
+    <h1>Create a New Contact</h1>
+    <form action="/create_contact" method="post">
+        <label>Email:</label>
+        <input type="email" name="email" required><br>
+        <label>First Name:</label>
+        <input type="text" name="firstname" required><br>
+        <label>Last Name:</label>
+        <input type="text" name="lastname" required><br>
+        <label>Phone:</label>
+        <input type="text" name="phone"><br>
+        <input type="submit" value="Create Contact">
+    </form>
+    <br>
+    <a href="/contacts">Back to Contacts</a>
+</body>
+</html>
