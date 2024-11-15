@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopify Product Selection</title>
+    <script>
+        async function getProductIDs() {
+            const response = await fetch('/collects');
+            const data = await response.json();
+
+            if (Array.isArray(data) && data.length > 0) {
+                const productList = document.getElementById('product-list');
+                data.forEach(productId => {
+                    const option = document.createElement('option');
+                    option.value = productId;
+                    option.text = `Product ID: ${productId}`;
+                    productList.appendChild(option);
+                });
+            }
+        }
+
+        async function getProductDetails() {
+            const productId = document.getElementById('product-list').value;
+
+            if (!productId) {
+                alert('Please select a product.');
+                return;
+            }
+
+            const response = await fetch(`/product/${productId}`);
+            const product = await response.json();
+
+            if (product.error) {
+                alert('Error fetching product details.');
+                return;
+            }
+
+            document.getElementById('product-name').textContent = product.title;
+            document.getElementById('product-description').textContent = product.body_html;
+            document.getElementById('product-price').textContent = `Price: $${product.variants[0].price}`;
+            document.getElementById('product-image').src = product.images[0].src;
+        }
+
+        window.onload = getProductIDs;
+    </script>
+</head>
+<body>
+    <h1>Select a Product</h1>
+
+    <label for="product-list">Choose a product:</label>
+    <select id="product-list" onchange="getProductDetails()">
+        <option value="">--Select a product--</option>
+    </select>
+
+    <h2>Product Details</h2>
+    <div id="product-details">
+        <h3 id="product-name"></h3>
+        <p id="product-description"></p>
+        <p id="product-price"></p>
+        <img id="product-image" alt="Product Image" width="200" />
+    </div>
+</body>
+</html>

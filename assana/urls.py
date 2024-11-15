@@ -12,6 +12,8 @@ urlpatterns = [
     # path('fetch_task_id/', views.fetch_task_id, name='fetch_task_id'),
     path('asana_auth/', views.asana_auth, name='asana_auth'),
     path('sync_asana/', views.sync_asana, name='sync_asana'),
+    path('asanasync/', views.asanasync, name='sync_asana'),
+    
 ]
 
     

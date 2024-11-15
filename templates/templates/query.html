@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Query Interaction</title>
+</head>
+<body>
+    <h1>{{ message }}</h1>
+    
+    <!-- Show dropdown for selecting workspace, project, section, or task -->
+    {% if options %}
+        <form method="POST">
+            <select name="user_input">
+                {% for option in options %}
+                    <option value="{{ option.gid }}/{{option.name}}">{{ option.name }}  </option>
+                {% endfor %}
+            </select>
+            <button type="submit">Submit</button>
+        </form>
+    {% else %}
+        <!-- Simple text input if no options to select -->
+        <form method="POST">
+            <input type="text" name="user_input" required>
+            <button type="submit">Submit</button>
+        </form>
+    {% endif %}
+</body>
+</html>
+
+

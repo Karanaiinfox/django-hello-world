@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="signup-container">
+    <h2>Create Your Account</h2>
+    <p>Sign up to get started with Aiinfox</p>
+    
+    <form id="signupForm" method="post">
+        {% csrf_token %}
+        <div class="input-group">
+            <input type="text" name="username" id="username" placeholder="Username" required>
+        </div>
+        <div class="input-group">
+            <input type="email" name="email" id="email" placeholder="Email" required>
+        </div>
+        <div class="input-group">
+            <input type="password" name="password" id="password" placeholder="Password" required>
+        </div>
+        <div class="input-group">
+            <input type="password" name="password_confirm" id="password_confirm" placeholder="Confirm Password" required>
+        </div>
+        <div class="input-group">
+            <input type="text" name="company" id="company" placeholder="Company Name" required>
+        </div>
+        <button type="submit" class="signup-button">Sign Up</button>
+    </form>
+
+    <div id="message"></div>
+</div>
+
+<!-- JavaScript for handling form submission -->
+
+{% endblock %}

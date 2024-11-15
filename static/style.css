@@ -547,9 +547,28 @@ button.btn.get-btn:hover {
   outline: none;
   width: 100%;
 }
+.custom-input2 {
+  padding: 10px 10px 10px 10px;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  outline: none;
+  width: 100%;
+}
 .custom-input:focus {
   border: 2px solid transparent;
   border-bottom: 2px solid #ff5c35;
+}
+.custom-input2:focus {
+  border: 2px solid transparent;
+  border-bottom: 2px solid #ff5c35;
+}
+/* .shopify-btn{
+  background-color: #81bf37 !important;
+  border: 1px solid #81bf37 !important;
+} */
+.store{
+  width: 10%;
+  margin-bottom: 10px;
 }
 .input-div label {
   font-family: "Poppins";

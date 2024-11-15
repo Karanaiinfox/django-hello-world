@@ -20,6 +20,10 @@ from django.urls import path,include
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("",include("hubspot.urls")),
+    path("",include("hubspot_app.urls")),
     path("asana/",include("assana.urls")),
+    path("shopify/",include("shopify.urls")),
+    path("quickbook/",include("quickbook.urls")),
+    path("login/",include("mainlogin.urls")),
+
 ]

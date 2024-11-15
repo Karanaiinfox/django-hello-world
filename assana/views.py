@@ -5,12 +5,14 @@ import asana
 import hubspot
 # from hubspot.crm.deals import SimplePublicObjectInput, ApiException
 from pprint import pprint
-
+from django.contrib.auth.decorators import login_required
 # from .utils import fetch_task_id, fetch_asana_data  # Assuming these are defined in utils.py
 
 logger = logging.getLogger(__name__)
 
+#@login_required
 def asana_auth(request):
+    print('asana_auth-----------------------------')
     if request.method=='POST':
         try:
             request.session['asana_access_token'] = request.POST['access_token']
@@ -21,6 +23,7 @@ def asana_auth(request):
     logger.info('Asana authentication page loaded')
     return render(request, 'asana_dashboard.html')
 
+#@login_required
 def sync_asana(request):
     access_token = request.session.get('asana_access_token')
     if access_token:
@@ -29,10 +32,70 @@ def sync_asana(request):
     else:
         logger.error('Error saving Asana access token: Nt able to Fetch token from Session' )
         return JsonResponse({"error": "Access token not found"}, status=401)
+ 
+
+def asanasync(request):
+    """Fetch task details for a specific section in Asana and create deals in HubSpot"""
+    from hubspot import HubSpot
+    import hubspot
+    from pprint import pprint
+    from hubspot.crm.deals import BatchInputSimplePublicObjectInputForCreate, ApiException
+    from hubspot.crm.deals import SimplePublicObjectInput, ApiException, ApiException
+
+    hubspot_access_token = request.session.get('hubspot_access_token')
+    access_token = request.session.get('asana_access_token')
+    section_id = request.GET.get('section_id')
+    section_name = request.GET.get('section_name')
+    # task_ids = request.args.get('task_ids')
+    print("ghhhhhhhhhffffffffff",section_id)
+    synced_deals=[]
+    if not access_token:
+        return JsonResponse({"error": "Asana access token is missing"}), 401
+    if not hubspot_access_token:
+        return JsonResponse({"error": "HubSpot access token is missing"}), 401
+    # if not task_id:
+    #     return jsonify({"error": "Section ID is missing"}), 400
+
+    # Initialize HubSpot client
+    client = hubspot.Client.create(access_token=hubspot_access_token)
+    task_ids=fetch_task_id(section_id,access_token)
+    print("ggggggggg",task_ids)
+    for task_id, name in zip(task_ids, section_name):
+        
+            # Fetch data for each task in the section
+        data = fetch_asana_data(task_id, access_token)  # `fetch_asana_data` should fetch details of each task
+
+            # Define properties for the HubSpot deal based on task data
+        properties = {
+            "dealname": data['Deal_name'],
+            "assignee": data['assignee_name'],
+            "project": data['project'],
+            "section_category": section_name,
+            "comment": str(data['comment']),
+            "notes": str(data['notes']),
+        }
+
+        # Create a deal in HubSpot
+        print("++++++++++++",properties)
+        deal_input = SimplePublicObjectInput(properties=properties)
+        print("============",deal_input)
+        try:
+            api_response = client.crm.deals.basic_api.create(simple_public_object_input_for_create=deal_input)
+            print("Deal created:", api_response)
+            synced_deals.append(data['Deal_name'])
+        except ApiException as e:
+            print(f"Exception when creating deal in HubSpot: {e}")
+        except Exception as e:
+            print(f"Error fetching or processing task {task_id}: {e}")
+            # continue
+
+    return JsonResponse(synced_deals) 
+ 
     
+#@login_required
 def get_workspace(request):
     access_token = request.session.get('asana_access_token')
-    
+    print(access_token)
     configuration = asana.Configuration()
     configuration.access_token = access_token
     api_client = asana.ApiClient(configuration)
@@ -44,14 +107,16 @@ def get_workspace(request):
     }
     workspace_list=[]
     workspaces = workspaces_api.get_workspaces(opts)
-    print(workspaces,'------------')
+    print(workspaces,'------++------')
     for i in workspaces:
+        print(i)
         workspace_list.append({'gid': i['gid'], 'name': i['name']})
     
     # workspace_list = [w for w in workspaces]
     print(workspace_list)
     return JsonResponse(workspace_list, safe=False)
 
+#@login_required
 def get_projects(request):
     access_token = request.session.get('asana_access_token')
     workspace_gid = request.GET.get('workspace_gid')
@@ -78,6 +143,7 @@ def get_projects(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
     
+#@login_required
 def get_sections(request):
     access_token = request.session.get('asana_access_token')
     project_gid = request.GET.get('project_gid')
@@ -110,67 +176,70 @@ def get_sections(request):
     except Exception as e:
         return JsonResponse({"error": f"Unexpected error: {str(e)}"}, status=500)
     
-def asanasync(request):
-    """
-    Fetch task details for a specific section in Asana and create deals in HubSpot.
-    """
-    # Fetch access tokens from Django session
-    hubspot_access_token = request.session.get('hubspot_access_token')
-    asana_access_token = request.session.get('access_token')
-    section_id = request.GET.get('section_id')
-    section_name = request.GET.get('section_name')
+# #@login_required
+# def asanasync(request):
+#     """
+#     Fetch task details for a specific section in Asana and create deals in HubSpot.
+#     """
+#     # Fetch access tokens from Django session
+#     hubspot_access_token = request.session.get('hubspot_access_token')
+#     print(hubspot_access_token,'[[[[[[[[[-----]]]]]]]]]')
+#     asana_access_token = request.session.get('asana_access_token')
+#     section_id = request.GET.get('section_id')
+#     section_name = request.GET.get('section_name')
 
-    if not asana_access_token:
-        return JsonResponse({"error": "Asana access token is missing"}, status=401)
-    if not hubspot_access_token:
-        return JsonResponse({"error": "HubSpot access token is missing"}, status=401)
-    if not section_id or not section_name:
-        return JsonResponse({"error": "Section ID or Section Name is missing"}, status=400)
+#     if not asana_access_token:
+#         return JsonResponse({"error": "Asana access token is missing"}, status=401)
+#     if not hubspot_access_token:
+#         return JsonResponse({"error": "HubSpot access token is missing"}, status=401)
+#     if not section_id or not section_name:
+#         return JsonResponse({"error": "Section ID or Section Name is missing"}, status=400)
 
-    # Initialize HubSpot client
-    client = hubspot.Client.create(access_token=hubspot_access_token)
-    synced_deals = []
+#     # Initialize HubSpot client
+#     client = hubspot.Client.create(access_token=hubspot_access_token)
+#     synced_deals = []
 
-    # Fetch task IDs for the given Asana section
-    try:
-        task_ids = fetch_task_id(request,section_id)
-        print("Task IDs:", task_ids)
-    except Exception as e:
-        return JsonResponse({"error": f"Error fetching task IDs: {str(e)}"}, status=500)
+#     # Fetch task IDs for the given Asana section
+#     try:
+#         task_ids = fetch_task_id(request,section_id)
+#         print("Task IDs:", task_ids)
+#     except Exception as e:
+#         return JsonResponse({"error": f"Error fetching task IDs: {str(e)}"}, status=500)
 
-    # Iterate over the task IDs and create deals in HubSpot
-    for task_id in task_ids:
-        try:
-            # Fetch data for each task in the section
-            data = fetch_asana_data(request,task_id)
+#     # Iterate over the task IDs and create deals in HubSpot
+#     for task_id in task_ids:
+#         try:
+#             # Fetch data for each task in the section
+#             data = fetch_asana_data(request,task_id)
 
-            # Prepare properties for HubSpot deal creation
-            properties = {
-                "dealname": data.get('Deal_name', ''),
-                "assignee": data.get('assignee_name', ''),
-                "project": data.get('project', ''),
-                "section_category": section_name,
-                "comment": str(data.get('comment', '')),
-                "notes": str(data.get('notes', '')),
-            }
+#             # Prepare properties for HubSpot deal creation
+#             properties = {
+#                 "dealname": data.get('Deal_name', ''),
+#                 "assignee": data.get('assignee_name', ''),
+#                 "project": data.get('project', ''),
+#                 "section_category": section_name,
+#                 "comment": str(data.get('comment', '')),
+#                 "notes": str(data.get('notes', '')),
+#             }
 
-            print("Properties for HubSpot Deal:", properties)
-            deal_input = SimplePublicObjectInput(properties=properties)
+#             print("Properties for HubSpot Deal:", properties)
+#             deal_input = SimplePublicObjectInput(properties=properties)
 
-            # Create a deal in HubSpot
-            api_response = client.crm.deals.basic_api.create(simple_public_object_input_for_create=deal_input)
-            print("Deal created:", api_response)
-            synced_deals.append(data['Deal_name'])
-        except ApiException as e:
-            print(f"Exception when creating deal in HubSpot: {e}")
-        except Exception as e:
-            print(f"Error fetching or processing task {task_id}: {e}")
+#             # Create a deal in HubSpot
+#             api_response = client.crm.deals.basic_api.create(simple_public_object_input_for_create=deal_input)
+#             print("Deal created:", api_response)
+#             synced_deals.append(data['Deal_name'])
+#         except ApiException as e:
+#             print(f"Exception when creating deal in HubSpot: {e}")
+#         except Exception as e:
+#             print(f"Error fetching or processing task {task_id}: {e}")
 
-    return JsonResponse(synced_deals, safe=False)
+#     return JsonResponse(synced_deals, safe=False)
 
-def fetch_task_id(request):
-    access_token = request.session.get('access_token')
-    section_id = request.GET.get('section_id')
+#@login_required
+def fetch_task_id(section_id,access_token):
+    # access_token 
+    # section_id = request.GET.get('section_id')
 
     # Check if access token and section ID are available
     if not access_token:
@@ -199,48 +268,51 @@ def fetch_task_id(request):
     except Exception as e:
         return JsonResponse({"error": f"Unexpected error: {str(e)}"}, status=500)
         
-def fetch_task_id(request):
-    access_token = request.session.get('access_token')
-    section_id = request.GET.get('section_id')
+#@login_required
+# def fetch_task_id(request):
+#     access_token = request.session.get('access_token')
+#     section_id = request.GET.get('section_id')
 
-    # Check if access token and section ID are available
-    if not access_token:
-        return JsonResponse({"error": "Asana access token is missing"}, status=401)
-    if not section_id:
-        return JsonResponse({"error": "Section ID is missing"}, status=400)
+#     # Check if access token and section ID are available
+#     if not access_token:
+#         return JsonResponse({"error": "Asana access token is missing"}, status=401)
+#     if not section_id:
+#         return JsonResponse({"error": "Section ID is missing"}, status=400)
 
-    # Initialize Asana API client with the access token
-    configuration = asana.Configuration()
-    configuration.access_token = access_token
-    api_client = asana.ApiClient(configuration)
-    tasks_api_instance = asana.TasksApi(api_client)
+#     # Initialize Asana API client with the access token
+#     configuration = asana.Configuration()
+#     configuration.access_token = access_token
+#     api_client = asana.ApiClient(configuration)
+#     tasks_api_instance = asana.TasksApi(api_client)
 
-    opts = {
-        'limit': 50,
-        'opt_fields': "name,completed,created_at"
-    }
+#     opts = {
+#         'limit': 50,
+#         'opt_fields': "name,completed,created_at"
+#     }
 
-    try:
-        # Fetch tasks for the specified section
-        tasks = tasks_api_instance.get_tasks_for_section(section_id, opts)
-        task_list = [{'gid': task['gid'], 'name': task['name']} for task in tasks]
-        return JsonResponse(task_list, safe=False)
-    except asana.rest.ApiException as e:
-        return JsonResponse({"error": f"Asana API error: {str(e)}"}, status=500)
-    except Exception as e:
-        return JsonResponse({"error": f"Unexpected error: {str(e)}"}, status=500)
+#     try:
+#         # Fetch tasks for the specified section
+#         tasks = tasks_api_instance.get_tasks_for_section(section_id, opts)
+#         task_list = [{'gid': task['gid'], 'name': task['name']} for task in tasks]
+#         return JsonResponse(task_list, safe=False)
+#     except asana.rest.ApiException as e:
+#         return JsonResponse({"error": f"Asana API error: {str(e)}"}, status=500)
+#     except Exception as e:
+#         return JsonResponse({"error": f"Unexpected error: {str(e)}"}, status=500)
     
-def fetch_asana_data(request, task_gid):
+#@login_required
+def fetch_asana_data(task_gid,access_token):
     """
     Fetch task details and comments from Asana for a specific task.
     """
     # Get access token from Django session
-    access_token = request.session.get('access_token')
+    # access_token = request.session.get('access_token')
     if not access_token:
         return JsonResponse({"error": "Asana access token is missing"}, status=401)
 
     # Initialize Asana API client
     configuration = asana.Configuration()
+    print(access_token,'----------------==-----------------------')
     configuration.access_token = access_token
     api_client = asana.ApiClient(configuration)
     tasks_api_instance = asana.TasksApi(api_client)
@@ -257,7 +329,7 @@ def fetch_asana_data(request, task_gid):
         )
     }
 
-    try:
+    if True:
         # Fetch task details
         api_response = tasks_api_instance.get_task(task_gid, task_opts)
 
@@ -290,9 +362,9 @@ def fetch_asana_data(request, task_gid):
 
         return JsonResponse(response, safe=False)
 
-    except ApiException as e:
+    else: #except ApiException as e:
         error_message = f"Exception when calling Asana API: {str(e)}"
         return JsonResponse({"error": error_message}, status=500)
-    except Exception as e:
-        return JsonResponse({"error": f"Unexpected error: {str(e)}"}, status=500)
+    # except Exception as e:
+    #     return JsonResponse({"error": f"Unexpected error: {str(e)}"}, status=500)
  

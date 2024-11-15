@@ -1,0 +1,41 @@
+<!-- templates/ask.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ask a Question</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Ask a Question</h1>
+    <form id="ask-form">
+        <label for="question">Your Question:</label><br>
+        <input type="text" id="question" name="question" required><br><br>
+        <button type="submit">Ask</button>
+    </form>
+    <div id="response" style="margin-top: 20px;"></div>
+
+    <script>
+        $(document).ready(function() {
+            $('#ask-form').on('submit', function(event) {
+                event.preventDefault(); // Prevent the form from submitting the traditional way
+                const question = $('#question').val();
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/ask',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ question: question }),
+                    success: function(response) {
+                        $('#response').html(`<strong>Answer:</strong> ${response.answer}`);
+                    },
+                    error: function(xhr) {
+                        $('#response').html(`<strong>Error:</strong> ${xhr.responseJSON.error}`);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

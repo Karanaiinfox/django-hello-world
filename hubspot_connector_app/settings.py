@@ -14,7 +14,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
-
+import pymysql
+pymysql.install_as_MySQLdb()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-%g9j7-lfm+(ja8gqy_malsq!qp)y3&s#l1c$qc=)sjgq+mf*u1"
-
+Key_="fasdifjwefoqpk@32rnfkffkjfasdjw*rmfaskj&fj34rk-lmafj3435k%$#joj8797988jhk34rke"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -41,7 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "hubspot",
+    "hubspot_app",
     "assana",
     "mainlogin",
     "quickbook",
@@ -56,11 +57,12 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # 'assana.middleware.AuthRequiredMiddleware',
 ]
 
 ROOT_URLCONF = "hubspot_connector_app.urls"
 
-
+LOGIN_URL = '../login'
 
 WSGI_APPLICATION = "hubspot_connector_app.wsgi.application"
 
@@ -69,11 +71,17 @@ WSGI_APPLICATION = "hubspot_connector_app.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'hubconnectai',
+        'USER': 'root',
+        'PASSWORD': 'root@123',
+        'HOST': 'localhost',
+        'PORT': '3306'
+        
+        },
     }
-}
+
 
 
 # Password validation
@@ -94,6 +102,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = 'mainlogin.User'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/

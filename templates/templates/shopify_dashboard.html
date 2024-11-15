@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+</head>
+<body>
+    <h1>Welcome to Shopify</h1>
+    <p>Store Name: {{ store_name }}</p>
+    <form action="/sync_products" method="POST">
+        <button type="submit">Sync Products</button>
+    </form>
+    <form action="/sync_orders" method="POST">
+        <button type="submit">Sync Orders</button>
+    </form>
+</body>
+</html>
